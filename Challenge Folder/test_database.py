@@ -72,7 +72,7 @@ def execute_queries_get_dataframes(query_string_list):
     return response
 
 
-def exc_qrs_get_dfs(query_string_list):
+def exc_qrs_get_dfs(query):
     """Excute the list of queries as sql and returns dataframes.
 
     Args:
@@ -88,42 +88,42 @@ def exc_qrs_get_dfs(query_string_list):
     response = []
 
     # declare dataframe list
-    df_list = []
+    # df_list = []
     # loop through the list
-    for query in query_string_list:
+    # for query in query_string_list:
 
-        try:
-            # connect to server
-            con = pg.connect(**DB_KWARGS_TEXT)
-            # create a cursor
-            cur = con.cursor()
-        
-            # create new stringIO
-            store = io.StringIO()
-            # put query into sql
-            sql_string = "COPY ({query}) TO STDOUT WITH CSV HEADER".format(query=query)
-            # put sql response into stringio
-            cur.copy_expert(str(sql_string), store)
-            # prepare to read csv
-            store.seek(0)
-            # put csv into dataframe
-            df = pd.read_csv(store, na_filter=False)
-            # add dataframe to list
-            df_list.append(df)
+    try:
+        # connect to server
+        con = pg.connect(**DB_KWARGS_TEXT)
+        # create a cursor
+        cur = con.cursor()
+    
+        # create new stringIO
+        store = io.StringIO()
+        # put query into sql
+        sql_string = "COPY ({query}) TO STDOUT WITH CSV HEADER".format(query=query)
+        # put sql response into stringio
+        cur.copy_expert(str(sql_string), store)
+        # prepare to read csv
+        store.seek(0)
+        # put csv into dataframe
+        df = pd.read_csv(store, na_filter=False)
+        # add dataframe to list
+        # df_list.append(df)
 
-            # commit executions
-            con.commit()
-            # close the cursor
-            cur.close()
+        # commit executions
+        con.commit()
+        # close the cursor
+        cur.close()
 
-            response = df_list
+        response = df
 
-        except pg.Error as error:
-            for query in query_string_list:
-                response.append(error)
-        finally:
-            if con is not None:
-                con.close()
+    except pg.Error as error:
+        # for query in query_string_list:
+        response.append(error)
+    finally:
+        if con is not None:
+            con.close()
 
     return response
     

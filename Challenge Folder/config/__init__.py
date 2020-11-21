@@ -1,0 +1,4 @@
+import os
+
+FLASK_SECRET_KEY = os.environ.get("ICP_FLASK_SECRET_KEY")
+WTF_CSRF_TIME_LIMIT = 1800

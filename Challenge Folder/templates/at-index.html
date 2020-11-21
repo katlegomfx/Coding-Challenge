@@ -29,8 +29,8 @@
   <form>
     <label for="items">
         Quantity of data items to test with:
-        <input id="items" type="number" name="items" 
-    onkeydown="if(event.keyCode == 13){document.getElementById('go').click()}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input id="items" type="number" name="items" onkeydown="if(event.keyCode == 13){document.getElementById('go').click()}">
     </label>
 
     <button id="go" type="button" onclick="location.assign('/test/' + document.getElementById('items').value +'?person=james')">

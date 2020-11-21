@@ -7,26 +7,11 @@ from pandas import DataFrame
 
 
 from test_database import (
-    # execute_queries_get_dataframes,
+    execute_queries_get_dataframes,
     exc_qrs_get_dfs)
 
 log.basicConfig(level=log.DEBUG)
 log.info('----- QRS_GETS.PY -----')
-
-def exec_it(query):
-    log.info("query list: %s", query)
-    try:
-        # get the data
-        response = exc_qrs_get_dfs(query)
-        log.info("database responses: %s", response)
-
-        return response
-
-    except Exception as error:
-        log.info(error)
-        return error
-
-
 
 def get_table(table=None):
     """Gets all data needed to display map from the desk being scanned.
@@ -42,11 +27,34 @@ def get_table(table=None):
 
     # ˅
     if table == "records":
+        query = ("SELECT * FROM records")
+    elif table == "data":
+        query = ("SELECT * FROM data")
+
+    log.info("query list: %s", query)
+
+    try:
+        # get the data
+        response = exc_qrs_get_dfs(query)
+        log.info("database responses: %s", response)
+
+        # response_object = {
+        #     "records_table":response_list[0],
+        #     "data_table": response_list[1]}
+
+    except Exception as error:
+        log.info(error)
+        return error
+
+    # ˅
+    if table == "records":
         response_object={
-            "records_table":exec_it("SELECT * FROM records")}
+            "records_table":response}
         return response_object
 
     if table == "data":
         response_object={
-            "data_table":exec_it("SELECT * FROM data")}
+            "data_table":response}
         return response_object
+
+    # return response_object

@@ -10,7 +10,15 @@ from flask.logging import create_logger
 
 import test_gets as gets
 
+from flask_wtf.csrf import CSRFProtect
+# from .config import FLASK_SECRET_KEY, WTF_CSRF_TIME_LIMIT
+
+
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "onthewayweare"
+app.config['WTF_CSRF_TIME_LIMIT'] = 1800
+csrf = CSRFProtect(app)
+
 
 logging.basicConfig(level=logging.DEBUG)
 log = create_logger(app)
@@ -70,45 +78,38 @@ def at_test(item_count=None):
 	#  ˄This is the script that measures the performance, not allowed to edit this section.˄ 
 
     # <- get email query string
-    person_query = request.args.get('person', type = str)
+    # person_query = request.args.get('person', type = str)
 
     type_query = request.args.get('type', type = str)
 
     # <- get user info
     response = gets.get_table("records")
+
+
+    # handle final render
     if isinstance(response, Exception):
         return render_template('at-error.html', message="There was an error.", error=response)
-
-    records_json = response["records_table"].to_json(orient="records")
-
-    response2 = gets.get_table("data")
-
-    if item_count > 100:
-
+    elif item_count > 100:
         return render_template(
             'at-error.html',
             message="More then 100 items selected, too many. Item Count: ",
             error=item_count)
+    else:
+        # decide on json or text
+        if type_query == 'text':
+            data = gets.get_table("data")["data_table"].to_json(orient="records")
+            html = 'at-text.html'
+        else:
+            data = gets.get_table("data")["data_table"].to_json(orient="records")
+            html = 'at-json.html'
 
-    if (type_query == "text"):
-
-        data_text = response2["data_table"].to_json(orient="records")
-
+        # render
         return render_template(
-            'at-text.html',
-            records=records_json,
-            data=data_text,
+            html,
+            records=response["records_table"].to_json(orient="records"),
+            data=data,
             item_count=item_count,
             hit=hit_time)
-    
-    data_json = response2["data_table"].to_json(orient="records")
-
-    return render_template(
-        'at-json.html',
-        records=records_json,
-        data=data_json,
-        item_count=item_count,
-        hit=hit_time)
 
 
 if __name__ == "__main__":
